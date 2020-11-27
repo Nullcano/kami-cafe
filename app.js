@@ -5,13 +5,13 @@ let game = data.game;
 let player = data.player;
 let products = data.products;
 let apparelItems = data.apparelItems;
-let interiorItems = data.interiorItems;
 let apparelShop = data.apparelShop;
+let apparelOwned = data.apparelOwned;
+let apparelEquipped = data.apparelEquipped;
+let interiorItems = data.interiorItems;
 let interiorShop = data.interiorShop;
-let apparelOn = data.apparelOn;
-let interiorOn = data.interiorOn;
-let apparelOff = data.apparelOff;
-let interiorOff = data.interiorOff;
+let interiorOwned = data.interiorOwned;
+let interiorEquipped = data.interiorEquipped;
 let tasks = data.tasks;
 let achievements = data.achievements;
 
@@ -55,18 +55,18 @@ function updateGame() {
     </div>
 
     <menu class="main-menu">
-      <span class="nav-item">Home</span>
-      <span class="nav-item active">Kami Café</span>
-      <span class="nav-item">Tasks</span>
-      <span class="nav-item">Ichi Apparel</span>
-      <span class="nav-item">Fuji Interior</span>
-      <span class="nav-item">Storage</span>
-      <span class="nav-item">Achievements</span>
-      <span class="nav-item">Settings</span>
+      <span class="home-link">Home</span>
+      <span class="cafe-link">Kami Café</span>
+      <span class="tasks-link">Tasks</span>
+      <span class="apparel-link">Ichi Apparel</span>
+      <span class="interior-link">Fuji Interior</span>
+      <span class="storage-link">Storage</span>
+      <span class="achievements-link">Achievements</span>
+      <span class="settings-link">Settings</span>
     </menu>
 
     <section id="home">
-      <div class="interior"></div>
+      <div class="interior-home"></div>
       <div class="character" style="background-image: url(${player.sprite})"></div>
     </section>
 
@@ -112,9 +112,9 @@ function updateGame() {
         <div class="storage-items">
           <h3>Storage</h3>
           <h4>Apparel</h4>
-          <div class="apparel-stored"></div>
+          <div class="apparel-owned"></div>
           <h4>Interior</h4>
-          <div class="interior-stored"></div>
+          <div class="interior-owned"></div>
         </div>
       </div>
     </section>
@@ -160,23 +160,15 @@ function updateGame() {
   `
 
   document.querySelector('.menu-icon').addEventListener('click', () => {
-    const mainMenu = document.querySelector('.main-menu');
-    if (mainMenu.style.display === 'flex') {
-      mainMenu.style.display = 'none';
-    } else {
-      mainMenu.style.display = 'flex';
-    }
-    mainMenu.addEventListener('click', () => {
-      mainMenu.style.display = 'none';
-    });
+    document.querySelector('.main-menu').classList.toggle('flex')
   });
 
-  let navItems = document.querySelectorAll('.nav-item');
+  let navItems = document.querySelectorAll('.main-menu span');
   navItems.forEach(item => {
     item.addEventListener('mouseenter', () => hover.play());
     item.addEventListener('mouseleave', () => hover.currentTime = 0);
+    item.addEventListener('click', () => document.querySelector('.main-menu').classList.toggle('flex'));
   });
-
 }
 
 function newCustomer() {
@@ -248,17 +240,18 @@ function updateTasks() {
 
 function sortItems() {
   apparelShop = [];
+  apparelOwned = [];
+  apparelEquipped = [];
+
   interiorShop = [];
-  apparelOn = [];
-  interiorOn = [];
-  apparelOff = [];
-  interiorOff = [];
+  interiorOwned = [];
+  interiorEquipped = [];
 
   apparelItems.map((item) => {
     if (item.owned === true && item.equipped === true) {
-      apparelOn.push(item);
+      apparelEquipped.push(item);
     } else if (item.owned === true) {
-      apparelOff.push(item);
+      apparelOwned.push(item);
     } else {
       apparelShop.push(item);
     }
@@ -266,20 +259,20 @@ function sortItems() {
 
   interiorItems.map((item) => {
     if (item.owned === true && item.equipped === true) {
-      interiorOn.push(item);
+      interiorEquipped.push(item);
     } else if (item.owned === true) {
-      interiorOff.push(item);
+      interiorOwned.push(item);
     } else {
       interiorShop.push(item);
     }
   });
 }
 
-function updateApparel() {
-  const apparelShopDisplay = document.querySelector('.apparel-shop');
-  apparelShopDisplay.innerHTML = '';
+function updateApparelShop() {
+  const apparelShopDOM = document.querySelector('.apparel-shop');
+  apparelShopDOM.innerHTML = '';
   apparelShop.forEach((item) => {
-    apparelShopDisplay.innerHTML += `
+    apparelShopDOM.innerHTML += `
       <div class="item-container">
         <div class="item-display" style="background-image:url(${item.img})"></div>
         <div class="item-info">
@@ -289,7 +282,7 @@ function updateApparel() {
       </div>
     `;
   });
-  let buyBtns = [...document.querySelectorAll('.buy-btn')];
+  let buyBtns = [...document.querySelectorAll('.apparel-shop .buy-btn')];
   buyBtns.forEach((btn) => {
     btn.addEventListener('click', (e) => {
       buyApparel(e.target);
@@ -297,11 +290,11 @@ function updateApparel() {
   });
 }
 
-function updateInterior() {
-  const interiorShopDisplay = document.querySelector('.interior-shop');
-  interiorShopDisplay.innerHTML = '';
+function updateInteriorShop() {
+  const interiorShopDOM = document.querySelector('.interior-shop');
+  interiorShopDOM.innerHTML = '';
   interiorShop.forEach((item) => {
-    interiorShopDisplay.innerHTML += `
+    interiorShopDOM.innerHTML += `
       <div class="item-container">
         <div class="item-display" style="background-image:url(${item.img})"></div>
         <div class="item-info">
@@ -311,7 +304,7 @@ function updateInterior() {
       </div>
     `;
   });
-  let buyBtns = [...document.querySelectorAll('.buy-btn')];
+  let buyBtns = [...document.querySelectorAll('.interior-shop .buy-btn')];
   buyBtns.forEach((btn) => {
     btn.addEventListener('click', (e) => {
       buyInterior(e.target);
@@ -319,11 +312,11 @@ function updateInterior() {
   });
 }
 
-function updateApparelInventory() {
-  const apparelStored = document.querySelector('.apparel-stored');
-  apparelStored.innerHTML = '';
-  apparelOff.forEach((item) => {
-    apparelStored.innerHTML += `
+function updateApparelOwned() {
+  const apparelOwnedDOM = document.querySelector('.apparel-owned');
+  apparelOwnedDOM.innerHTML = '';
+  apparelOwned.forEach((item) => {
+    apparelOwnedDOM.innerHTML += `
       <div class="item-container">
         <div class="item-display" style="background-image:url(${item.img})"></div>
         <div class="item-info">
@@ -337,14 +330,14 @@ function updateApparelInventory() {
     `;
   });
 
-  let equipBtns = [...document.querySelectorAll('.equip-btn')];
+  let equipBtns = [...document.querySelectorAll('.apparel-owned .equip-btn')];
   equipBtns.forEach((btn) => {
     btn.addEventListener('click', (e) => {
       equipApparel(e.target);
     });
   });
 
-  let sellBtns = [...document.querySelectorAll('.sell-btn')];
+  let sellBtns = [...document.querySelectorAll('.apparel-owned .sell-btn')];
   sellBtns.forEach((btn) => {
     btn.addEventListener('click', (e) => {
       sellApparel(e.target);
@@ -352,11 +345,11 @@ function updateApparelInventory() {
   });
 }
 
-function updateInteriorInventory() {
-  const interiorStored = document.querySelector('.interior-stored');
-  interiorStored.innerHTML = '';
-  interiorOff.forEach((item) => {
-    interiorStored.innerHTML += `
+function updateInteriorOwned() {
+  const interiorOwnedDOM = document.querySelector('.interior-owned');
+  interiorOwnedDOM.innerHTML = '';
+  interiorOwned.forEach((item) => {
+    interiorOwnedDOM.innerHTML += `
       <div class="item-container">
         <div class="item-display" style="background-image:url(${item.img})"></div>
         <div class="item-info">
@@ -370,14 +363,14 @@ function updateInteriorInventory() {
     `;
   });
 
-  let equipBtns = [...document.querySelectorAll('.equip-btn')];
+  let equipBtns = [...document.querySelectorAll('.interior-owned .equip-btn')];
   equipBtns.forEach((btn) => {
     btn.addEventListener('click', (e) => {
       equipInterior(e.target);
     });
   });
 
-  let sellBtns = [...document.querySelectorAll('.sell-btn')];
+  let sellBtns = [...document.querySelectorAll('.interior-owned .sell-btn')];
   sellBtns.forEach((btn) => {
     btn.addEventListener('click', (e) => {
       sellInterior(e.target);
@@ -397,20 +390,23 @@ const selectEyes = (el) => {
   el.appendChild(eyes)
 }
 
-function updateEquippedApparel() {
-  const character = [...document.querySelectorAll('.character')];
-  const equippedApparel = document.querySelector('.apparel-equipped');
+function updateApparelEquipped() {
+  const characters = [...document.querySelectorAll('.character')];
+  const apparelEquippedDOM = document.querySelector('.apparel-equipped');
+  
+  characters.forEach((character) => {
+    character.innerHTML = '';
+  })
+  
+  apparelEquippedDOM.innerHTML = '';
 
-  character.innerHTML = '';
-  equippedApparel.innerHTML = '';
-
-  apparelOn.forEach((item) => {
-    character.forEach(() => {
+  apparelEquipped.forEach((item) => {
+    characters.forEach((character) => {
       character.innerHTML += `
         <img class="${item.id}" src="${item.img}" alt="${item.name}">
       `;
     })
-    equippedApparel.innerHTML += `
+    apparelEquippedDOM.innerHTML += `
       <button class="unequip-btn" data-id=${item.id}>Unequip ${item.name}</button>
     `;
   });
@@ -421,20 +417,22 @@ function updateEquippedApparel() {
       unequipApparel(e.target);
     });
   });
+
+  customizeAvatar();
 }
 
-function updateEquippedInterior() {
-  const interiorHome = document.querySelector('.interior');
-  const equippedInterior = document.querySelector('.interior-equipped');
+function updateInteriorEquipped() {
+  const interiorHome = document.querySelector('.interior-home');
+  const interiorEquippedDOM = document.querySelector('.interior-equipped');
 
   interiorHome.innerHTML = '';
-  equippedInterior.innerHTML = '';
+  interiorEquippedDOM.innerHTML = '';
   
-  interiorOn.forEach((item) => {
+  interiorEquipped.forEach((item) => {
     interiorHome.innerHTML += `
       <img class="${item.id}" src="${item.img}" alt="${item.name}">
     `;
-    equippedInterior.innerHTML += `
+    interiorEquippedDOM.innerHTML += `
       <button class="unequip-btn" data-id=${item.id}>Unequip ${item.name}</button>
     `;
   });
@@ -488,7 +486,7 @@ function selectProduct(target) {
     console.log('Not enough energy')
   }
   render();
-  localStorage.setItem('save', JSON.stringify(data));
+  setSave();
 }
 
 function startTask(target) {
@@ -496,155 +494,143 @@ function startTask(target) {
   let task = tasks.find((task) => taskID == task.id);
   task.complete = true;
   player.money += task.reward;
-  render();
-  localStorage.setItem('save', JSON.stringify(data));  
+  setSave();
 }
 
 function buyApparel(target) {
   let itemID = target.dataset.id;
-  let item = apparelItems.find((item) => itemID == item.id);
+  let item = apparelShop.find((item) => itemID == item.id);
   item.owned = true;
   player.money -= item.price;
-  player.exp += 10
-  render();
-  localStorage.setItem('save', JSON.stringify(data));
+  player.exp += 10;
+  sortItems();
+  updateApparelShop();
+  updateApparelOwned();
+  setSave();
+  goto(apparelPanel);
 }
 
 function buyInterior(target) {
   let itemID = target.dataset.id;
-  let item = interiorItems.find((item) => itemID == item.id);
+  let item = interiorShop.find((item) => itemID == item.id);
   item.owned = true;
   player.money -= item.price;
-  player.exp += 10
-  render();
-  localStorage.setItem('save', JSON.stringify(data));
-  console.log({ item });
+  player.exp += 10;
+  sortItems();
+  updateInteriorShop();
+  updateInteriorOwned();
+  setSave();
+  goto(interiorPanel);
 }
 
 function sellApparel(target) {
   let itemID = target.dataset.id;
-  let item = apparelItems.find((item) => itemID == item.id);
+  let item = apparelOwned.find((item) => itemID == item.id);
   item.owned = false;
   player.money += item.price / 2;
-  player.exp += 10
-  render();
-  localStorage.setItem('save', JSON.stringify(data));
+  player.exp += 10;
+  sortItems();
+  updateApparelOwned();
+  updateApparelShop();
+  setSave();
 }
 
 function sellInterior(target) {
   let itemID = target.dataset.id;
-  let item = interiorItems.find((item) => itemID == item.id);
+  let item = interiorOwned.find((item) => itemID == item.id);
   item.owned = false;
   player.money += item.price / 2;
-  player.exp += 10
-  render();
-  localStorage.setItem('save', JSON.stringify(data));
+  player.exp += 10;
+  sortItems();
+  updateInteriorOwned();
+  updateInteriorShop();
+  setSave();
 }
 
 function equipApparel(target) {
   let itemID = target.dataset.id;
-  let item = apparelItems.find((item) => itemID == item.id);
+  let item = apparelOwned.find((item) => itemID == item.id);
   item.equipped = true;
-  render();
-  localStorage.setItem('save', JSON.stringify(data));
+  sortItems();
+  updateApparelOwned();
+  updateApparelEquipped();
+  setSave();
 }
 
 function equipInterior(target) {
   let itemID = target.dataset.id;
-  let item = interiorItems.find((item) => itemID == item.id);
+  let item = interiorOwned.find((item) => itemID == item.id);
   item.equipped = true;
-  render();
-  localStorage.setItem('save', JSON.stringify(data));
+  sortItems();
+  updateInteriorOwned();
+  updateInteriorEquipped();
+  setSave();
 }
 
 function unequipApparel(target) {
   let itemID = target.dataset.id;
-  let item = apparelItems.find((item) => itemID == item.id);
+  let item = apparelEquipped.find((item) => itemID == item.id);
   item.equipped = false;
-  render();
-  localStorage.setItem('save', JSON.stringify(data));
+  sortItems();
+  updateApparelEquipped();
+  updateApparelOwned();
+  setSave();
 }
 
 function unequipInterior(target) {
   let itemID = target.dataset.id;
-  let item = interiorItems.find((item) => itemID == item.id);
+  let item = interiorEquipped.find((item) => itemID == item.id);
   item.equipped = false;
-  render();
-  localStorage.setItem('save', JSON.stringify(data));
+  sortItems();
+  updateInteriorEquipped();
+  updateInteriorOwned();
+  setSave();
 }
 
-function resetGame() {
-	localStorage.removeItem('save');
-  location.reload();
+function setSave() {
+  localStorage.setItem('save', JSON.stringify(data));
 }
 
 function render() {
   updateGame();
   sortItems();
-  updateApparel();
-  updateInterior();
-  updateApparelInventory();
-  updateInteriorInventory();
-  updateEquippedApparel();
-  updateEquippedInterior();
-  updateTasks();
-  updateAchievements();
+  updateApparelShop();
+  updateApparelOwned();
+  updateApparelEquipped();
+  updateInteriorShop();
+  updateInteriorOwned();
+  updateInteriorEquipped();
   customizeAvatar();
-  renderWindows();
 }
 
 render();
 
-function renderWindows() {
-  const DOM = {
-    tabsNav: document.querySelector('.main-menu'),
-    tabsNavItems: document.querySelectorAll('.nav-item'),
-    panels: document.querySelectorAll('section')
-  };
-  
-  const setActiveItem = (el) => {
-    DOM.tabsNavItems.forEach(tab => {
-      tab.classList.remove('active');
-    });
-    el.classList.add('active');
-  };
-  
-  const findActiveItem = () => {
-    let activeIndex = 0;
-    for (let i = 0; i < DOM.tabsNavItems.length; i++) {
-      if (DOM.tabsNavItems[i].classList.contains('active')) {
-        activeIndex = i;
-        break;
-      };
-    }
-    return activeIndex;
-  };
-  
-  const findActivePanel = (i) => {
-    return DOM.panels[i];
-  };
-  
-  const setActivePanel = (i) => {
-    DOM.panels.forEach(el => {
-      el.classList.remove('active');
-    });
-    DOM.panels[i].classList.add('active');
-  };
-  
-  const activeItemIndex = findActiveItem();
-  findActivePanel(activeItemIndex);
-  setActivePanel(activeItemIndex);
-  
-  DOM.tabsNav.addEventListener('click', e => {
-    const navElemClass = 'nav-item';
-    if (e.target.classList.contains(navElemClass)) {
-      const clickedTab = e.target;
-      const activeItemIndex = Array.from(DOM.tabsNavItems).indexOf(clickedTab);
-      setActiveItem(clickedTab);
-      findActivePanel(activeItemIndex);
-      setActivePanel(activeItemIndex);
-    }
-  });  
-}
-renderWindows();
+const homePanel = document.querySelector('#home');
+const cafePanel = document.querySelector('#cafe');
+const tasksPanel = document.querySelector('#tasks');
+const apparelPanel = document.querySelector('#apparel');
+const interiorPanel = document.querySelector('#interior');
+const storagePanel = document.querySelector('#storage');
+const achievementsPanel = document.querySelector('#achievements');
+const settingsPanel = document.querySelector('#settings');
+
+const goto = (target) => {
+  let allSections = [...document.querySelectorAll('section')];
+  allSections.forEach(section => {
+    section.classList.remove('active');
+  });
+  target.classList.add('active');
+};
+
+window.onload = goto(cafePanel);
+
+document.querySelector('.home-link').addEventListener('click', () => goto(homePanel));
+document.querySelector('.cafe-link').addEventListener('click', () => goto(cafePanel));
+document.querySelector('.tasks-link').addEventListener('click', () => goto(tasksPanel));
+document.querySelector('.apparel-link').addEventListener('click', () => goto(apparelPanel));
+document.querySelector('.interior-link').addEventListener('click', () => goto(interiorPanel));
+document.querySelector('.storage-link').addEventListener('click', () => goto(storagePanel));
+document.querySelector('.achievements-link').addEventListener('click', () => goto(achievementsPanel));
+document.querySelector('.settings-link').addEventListener('click', () => goto(settingsPanel));
+
 newCustomer();

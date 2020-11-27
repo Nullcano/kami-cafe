@@ -265,10 +265,10 @@ let data = {
   ],
   apparelShop: [],
   interiorShop: [],
-  apparelOn: [],
-  interiorOn: [],
-  apparelOff: [],
-  interiorOff: [],
+  apparelOwned: [],
+  interiorOwned: [],
+  apparelEquipped: [],
+  interiorEquipped: [],
   pets: [
     {
       id: 'corgi',
